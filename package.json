@@ -1,0 +1,8 @@
+{
+  "name": "real-time-payment-processing-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "echo 'add tests' && exit 0"
+  }
+}

@@ -1,0 +1,5 @@
+# Python dependencies (to be decided in next steps)
+# Example if using FastAPI for API service:
+# fastapi==0.111.0
+# uvicorn[standard]==0.30.3
+# pydantic==2.8.2

@@ -1,0 +1,863 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"name": "Real-Time Payment Processing System",
+		"description": "Complete API collection for the Real-Time Payment Processing System. This collection demonstrates all endpoints with proper authentication, validation, and error handling.\n\n## Authentication\nAll requests require an X-API-Key header. Configure your API keys in the environment:\n- Admin: {{admin_api_key}}\n- Merchant: {{merchant_api_key}}\n- Analytics: {{analytics_api_key}}\n\n## Base URL\n{{base_url}}\n\n## Features Demonstrated\n- Payment processing with fraud detection\n- Transaction retrieval and history\n- Refund processing (full and partial)\n- API key authentication\n- Input validation and error handling",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "1. Payment Processing",
+			"item": [
+				{
+					"name": "Create Payment (Success)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has transaction_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('transaction_id');",
+									"    pm.environment.set('transaction_id', jsonData.transaction_id);",
+									"});",
+									"",
+									"pm.test(\"Payment status is completed\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('completed');",
+									"});",
+									"",
+									"pm.test(\"Response includes fraud check\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('fraud_check');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ",
+								"description": "Admin API Key (Full Access)"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 125.50,\n  \"currency\": \"USD\",\n  \"user_id\": \"demo_user_001\",\n  \"merchant_id\": \"demo_merchant_store\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Creates a successful payment transaction. This demonstrates:\n- API key authentication\n- Request validation\n- Fraud detection (low risk)\n- Transaction storage\n- Response formatting"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment (High Risk - Review)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Payment status requires review\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('pending_review');",
+									"});",
+									"",
+									"pm.test(\"High risk amount triggers review\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('review');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 5000.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"demo_user_002\",\n  \"merchant_id\": \"electronics_store\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Creates a high-value payment that triggers fraud review. Demonstrates:\n- Fraud detection rules (high amount)\n- Risk scoring algorithm\n- Pending review status\n- Business logic for risk management"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment (Declined - Very High Risk)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 402 (Payment Required)\", function () {",
+									"    pm.response.to.have.status(402);",
+									"});",
+									"",
+									"pm.test(\"Payment status is declined\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('declined');",
+									"});",
+									"",
+									"pm.test(\"Declined message is appropriate\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('declined');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 10000.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"test_suspicious_user\",\n  \"merchant_id\": \"temp_merchant_test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Creates a very high-risk payment that gets automatically declined. Shows:\n- Advanced fraud detection\n- Automatic decline logic\n- Suspicious pattern detection (test user IDs)\n- Risk-based decision making"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment (Idempotency Test)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Idempotency key prevents duplicate\", function () {",
+									"    // Run this request twice - second time should return same result",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('transaction_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Idempotency-Key",
+								"value": "demo-idempotency-key-12345",
+								"description": "Prevents duplicate payments"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 50.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"demo_user_003\",\n  \"merchant_id\": \"coffee_shop\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Demonstrates idempotency handling. Run this request multiple times with the same Idempotency-Key header to see how duplicate payments are prevented."
+					},
+					"response": []
+				}
+			],
+			"description": "Payment processing endpoints demonstrating various scenarios including successful payments, fraud detection, and idempotency handling."
+		},
+		{
+			"name": "2. Transaction Management",
+			"item": [
+				{
+					"name": "Get Transaction Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains transaction details\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('transaction_id');",
+									"    pm.expect(jsonData).to.have.property('amount');",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payments/{{transaction_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"{{transaction_id}}"
+							]
+						},
+						"description": "Retrieves details for a specific transaction. Uses the transaction_id from the previous successful payment request."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payments/nonexistent-transaction-id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"nonexistent-transaction-id"
+							]
+						},
+						"description": "Tests error handling for non-existent transactions. Demonstrates proper 404 response and error messaging."
+					},
+					"response": []
+				},
+				{
+					"name": "List Transactions (All)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains transactions array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('transactions');",
+									"    pm.expect(jsonData.transactions).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Response includes count and limit\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('count');",
+									"    pm.expect(jsonData).to.have.property('limit');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payments?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Number of transactions to return"
+								}
+							]
+						},
+						"description": "Lists recent transactions with pagination. Shows transaction history functionality."
+					},
+					"response": []
+				},
+				{
+					"name": "List Transactions (Filtered by User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Results are filtered by user_id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.transactions && jsonData.transactions.length > 0) {",
+									"        jsonData.transactions.forEach(function(transaction) {",
+									"            pm.expect(transaction.user_id).to.eql('demo_user_001');",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payments?user_id=demo_user_001&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "demo_user_001",
+									"description": "Filter by specific user"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Demonstrates transaction filtering by user_id. Shows advanced query capabilities."
+					},
+					"response": []
+				},
+				{
+					"name": "List Transactions (Filtered by Status)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payments?status=completed&merchant_id=demo_merchant_store&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "completed",
+									"description": "Filter by transaction status"
+								},
+								{
+									"key": "merchant_id",
+									"value": "demo_merchant_store",
+									"description": "Filter by merchant"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Shows multiple filter combinations for advanced transaction queries."
+					},
+					"response": []
+				}
+			],
+			"description": "Transaction retrieval and listing endpoints with filtering and pagination support."
+		},
+		{
+			"name": "3. Refund Processing",
+			"item": [
+				{
+					"name": "Process Full Refund",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Refund processed successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('refund_id');",
+									"    pm.expect(jsonData.status).to.eql('fully_refunded');",
+									"});",
+									"",
+									"pm.test(\"Refund amount matches original\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.refund_amount).to.eql(jsonData.total_refunded);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 125.50,\n  \"reason\": \"Customer requested full refund - defective product\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/{{transaction_id}}/refund",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"{{transaction_id}}",
+								"refund"
+							]
+						},
+						"description": "Processes a full refund for the original transaction. Demonstrates:\n- Refund validation\n- Transaction status updates\n- Audit trail creation\n- Business rule enforcement"
+					},
+					"response": []
+				},
+				{
+					"name": "Process Partial Refund",
+					"event": [
+						{
+							"listen": "pre-request",
+							"script": {
+								"exec": [
+									"// First create a new payment for partial refund demo",
+									"// This ensures we have a fresh transaction to partially refund"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 25.00,\n  \"reason\": \"Partial refund - shipping damage to one item\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/REPLACE_WITH_TRANSACTION_ID/refund",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"REPLACE_WITH_TRANSACTION_ID",
+								"refund"
+							]
+						},
+						"description": "Processes a partial refund. Shows:\n- Partial refund calculation\n- Remaining balance tracking\n- Multiple refund support\n- Status management (partially_refunded)"
+					},
+					"response": []
+				},
+				{
+					"name": "Refund Invalid Transaction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates transaction not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 50.00,\n  \"reason\": \"Refund for invalid transaction test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/invalid-transaction-id/refund",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"invalid-transaction-id",
+								"refund"
+							]
+						},
+						"description": "Tests refund error handling for non-existent transactions."
+					},
+					"response": []
+				}
+			],
+			"description": "Refund processing endpoints demonstrating full refunds, partial refunds, and error handling."
+		},
+		{
+			"name": "4. Error Handling & Security",
+			"item": [
+				{
+					"name": "Invalid API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "invalid-api-key-12345"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 100.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"test_user\",\n  \"merchant_id\": \"test_merchant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Tests authentication failure with invalid API key."
+					},
+					"response": []
+				},
+				{
+					"name": "Missing API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 100.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"test_user\",\n  \"merchant_id\": \"test_merchant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Tests authentication failure when API key is missing."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Request Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates missing field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('required');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 100.00,\n  \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Tests validation error handling for missing required fields."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Amount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates invalid amount\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('amount');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Key",
+								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": -50.00,\n  \"currency\": \"USD\",\n  \"user_id\": \"test_user\",\n  \"merchant_id\": \"test_merchant\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Tests validation for negative amounts."
+					},
+					"response": []
+				}
+			],
+			"description": "Security and error handling test cases demonstrating authentication, validation, and proper error responses."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://lorty8qfz4.execute-api.us-east-1.amazonaws.com/demo",
+			"type": "string"
+		},
+		{
+			"key": "transaction_id",
+			"value": "",
+			"type": "string",
+			"description": "Will be set automatically from successful payment requests"
+		}
+	]
+}

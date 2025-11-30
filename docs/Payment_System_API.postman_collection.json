@@ -46,7 +46,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ",
+								"value": "pk_demo_replace_with_your_actual_api_key_here",
 								"description": "Admin API Key (Full Access)"
 							},
 							{
@@ -101,7 +101,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -155,7 +155,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -205,7 +205,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -267,7 +267,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							}
 						],
 						"url": {
@@ -309,7 +309,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							}
 						],
 						"url": {
@@ -358,7 +358,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							}
 						],
 						"url": {
@@ -410,7 +410,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							}
 						],
 						"url": {
@@ -444,7 +444,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							}
 						],
 						"url": {
@@ -513,7 +513,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -558,7 +558,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -609,7 +609,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -750,7 +750,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",
@@ -799,7 +799,7 @@
 						"header": [
 							{
 								"key": "X-API-Key",
-								"value": "pk_demo_4dMUudRZuMNQYNMJlJ5fPvoGGq-CcUbZq7_OI5kS7eQ"
+								"value": "pk_demo_replace_with_your_actual_api_key_here"
 							},
 							{
 								"key": "Content-Type",

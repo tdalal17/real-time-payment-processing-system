@@ -18,12 +18,25 @@ except ImportError:
     from common.utils import PaymentSystemUtils
 
 class AdvancedAuthorizer:
+    # PBKDF2 parameters for API key hashing
+    API_KEY_HASH_SALT = b'your_unique_server_salt_here'    # Replace with secure, random value from config/env
+    API_KEY_HASH_ITERATIONS = 100_000                      # Adjust iteration count per your security requirements
+
     def __init__(self):
         self.dynamodb = PaymentSystemUtils.get_dynamodb_resource()
         self.api_keys_table = self.dynamodb.Table('payment-system-api-keys')
         self.audit_table = self.dynamodb.Table('payment-system-audit-log')
         self.threat_intel_table = self.dynamodb.Table('payment-system-threat-intel')
     
+    def _hash_api_key_pbkdf2(self, api_key: str) -> str:
+        """Generate API key hash using PBKDF2-HMAC-SHA256."""
+        dk = hashlib.pbkdf2_hmac(
+            'sha256',
+            api_key.encode(),
+            self.API_KEY_HASH_SALT,
+            self.API_KEY_HASH_ITERATIONS
+        )
+        return dk.hex()
     def authorize_request(self, event: Dict[str, Any]) -> Dict[str, Any]:
         """Authorize API request based on API key and permissions"""
 
@@ -75,7 +88,7 @@ class AdvancedAuthorizer:
         
         try:
             # Hash for lookup
-            key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+            key_hash = self._hash_api_key_pbkdf2(api_key)
             
             response = self.api_keys_table.get_item(Key={'key_hash': key_hash})
             

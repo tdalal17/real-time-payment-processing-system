@@ -99,7 +99,7 @@ Audit Logging: Complete transaction and access logging
 ## 🎯 **Interview Demonstration Capabilities**
 
 ### **Live System Demo**
-- **Working API**: `https://lorty8qfz4.execute-api.us-east-1.amazonaws.com/demo`
+- **API Endpoint**: `https://your-api-id.execute-api.us-east-1.amazonaws.com/demo`
 - **Postman Collection**: Ready-to-import test suite with 20+ requests
 - **Real Transactions**: Create payments, process refunds, view history
 - **Fraud Detection**: Demonstrate risk scoring with different amounts

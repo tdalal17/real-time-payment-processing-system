@@ -850,7 +850,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://lorty8qfz4.execute-api.us-east-1.amazonaws.com/demo",
+			"value": "https://your-api-id.execute-api.us-east-1.amazonaws.com/demo",
 			"type": "string"
 		},
 		{

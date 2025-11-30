@@ -1,10 +1,6 @@
 """
 Payment Processing Lambda
-
-Handles payment creation with validation, fraud checks, and transaction storage.
-
-Author: Payment System Team
-Version: 1.0.0
+Handles payment validation, fraud detection, and transaction storage
 """
 
 import json
@@ -32,14 +28,13 @@ idempotency_table = dynamodb.Table('payment-system-idempotency')
 
 
 class PaymentProcessor:
-    """Handles payment processing logic"""
-    
+    """Processes payments with validation and fraud detection"""
+
     SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP']
     MIN_AMOUNT = decimal.Decimal('0.01')
     MAX_AMOUNT = decimal.Decimal('99999.99')
-    
+
     def __init__(self):
-        """Initialize payment processor"""
         self.logger_enabled = True
     
     def _log(self, message: str) -> None:

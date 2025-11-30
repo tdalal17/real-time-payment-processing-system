@@ -2,7 +2,7 @@ import json
 import uuid
 import time
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 from decimal import Decimal
 import boto3
 from src.auth.security import authenticate_request, authorize_request, SecurityManager

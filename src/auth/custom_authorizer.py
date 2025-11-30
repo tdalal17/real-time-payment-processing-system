@@ -1,6 +1,6 @@
 """
-Enterprise Custom Authorizer for API Gateway
-Advanced authentication and authorization with threat detection
+Custom Authorizer for API Gateway
+Handles API key authentication and authorization
 """
 
 import json
@@ -21,26 +21,25 @@ except ImportError:
     from common.utils import PaymentSystemUtils
 
 class AdvancedAuthorizer:
-    """Enterprise-grade API Gateway custom authorizer"""
-    
+    """API Gateway custom authorizer with API key validation"""
+
     def __init__(self):
         self.dynamodb = PaymentSystemUtils.get_dynamodb_resource()
         self.api_keys_table = self.dynamodb.Table('payment-system-api-keys')
         self.audit_table = self.dynamodb.Table('payment-system-audit-log')
         self.threat_intel_table = self.dynamodb.Table('payment-system-threat-intel')
-        
-        # Threat detection thresholds
+
         self.suspicious_patterns = {
-            'rapid_requests': 10,  # More than 10 requests in 1 minute
-            'geographic_anomaly': 3,  # Requests from 3+ countries in 1 hour
-            'user_agent_rotation': 5,  # More than 5 different user agents
-            'api_key_sharing': 2,  # Same key from 2+ different IPs simultaneously
+            'rapid_requests': 10,
+            'geographic_anomaly': 3,
+            'user_agent_rotation': 5,
+            'api_key_sharing': 2,
         }
     
     def authorize_request(self, event: Dict[str, Any]) -> Dict[str, Any]:
-        """Main authorization logic with advanced threat detection"""
-        
-        # Extract request context - REQUEST authorizer format
+        """Authorize API request based on API key and permissions"""
+
+        # Extract request context
         method_arn = event['methodArn']
         headers = event.get('headers', {})
         
@@ -50,36 +49,34 @@ class AdvancedAuthorizer:
         source_ip = identity.get('sourceIp', '0.0.0.0')
         user_agent = identity.get('userAgent', 'Unknown')
         
-        # Extract API key
+        # Extract and validate API key
         api_key = headers.get('X-API-Key') or headers.get('x-api-key')
-        
-        # Step 1: Basic API key validation
+
         is_valid, client_info, error_reason = self._validate_api_key(api_key, event)
         if not is_valid:
             self._log_auth_failure(source_ip, user_agent, error_reason)
             return self._generate_deny_policy(method_arn, error_reason)
-        
-        # Step 2: Advanced threat detection
+
+        # Check for suspicious activity
         threat_score, threat_reasons = self._calculate_threat_score(client_info, event)
-        if threat_score > 0.7:  # High threat score
+        if threat_score > 0.7:
             self._log_security_threat(client_info, event, threat_score, threat_reasons)
             return self._generate_deny_policy(method_arn, "HIGH_THREAT_SCORE")
-        
-        # Step 3: Business logic authorization
+
+        # Verify permissions
         is_authorized, auth_error = self._check_business_authorization(client_info, event)
         if not is_authorized:
             return self._generate_deny_policy(method_arn, auth_error)
-        
-        # Step 4: Rate limiting validation
+
+        # Check rate limits
         rate_limit_ok, rate_error = self._validate_rate_limits(client_info, event)
         if not rate_limit_ok:
             return self._generate_deny_policy(method_arn, rate_error)
-        
-        # Step 5: Generate allow policy with context
+
         return self._generate_allow_policy(method_arn, client_info, threat_score)
     
     def _validate_api_key(self, api_key: str, event: Dict[str, Any]) -> Tuple[bool, Optional[Dict], str]:
-        """Advanced API key validation with pattern analysis"""
+        """Validate API key format and lookup in DynamoDB"""
         
         if not api_key:
             return False, None, "MISSING_API_KEY"
@@ -370,24 +367,14 @@ class AdvancedAuthorizer:
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """Lambda handler for custom authorization"""
-    
+
     try:
-        # DEBUG: Log the entire event structure
-        print("=== REQUEST AUTHORIZER DEBUG ===")
-        print(f"Full Event: {json.dumps(event, indent=2, default=str)}")
-        print(f"Event Keys: {list(event.keys())}")
-        if 'requestContext' in event:
-            print(f"RequestContext: {json.dumps(event['requestContext'], indent=2, default=str)}")
-        print("================================")
-        
         authorizer = AdvancedAuthorizer()
         return authorizer.authorize_request(event)
-    
+
     except Exception as e:
-        # On error, deny access and log the issue
         print(f"Authorizer error: {e}")
-        print(f"Event that caused error: {json.dumps(event, indent=2, default=str)}")
-        
+
         return {
             'principalId': 'error',
             'policyDocument': {

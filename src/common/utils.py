@@ -1,10 +1,5 @@
 """
-Common Utilities for Payment System
-
-Shared utility functions used across Lambda functions.
-
-Author: Payment System Team
-Version: 1.0.0
+Common utilities for the payment system
 """
 
 import json

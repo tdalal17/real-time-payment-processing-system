@@ -7,15 +7,24 @@ import json
 import time
 import hashlib
 import re
+import os
+import sys
 from typing import Dict, Any, Optional, Tuple, List
 import boto3
 from decimal import Decimal
+
+# Ensure common modules can be imported
+try:
+    from common.utils import PaymentSystemUtils
+except ImportError:
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from common.utils import PaymentSystemUtils
 
 class AdvancedAuthorizer:
     """Enterprise-grade API Gateway custom authorizer"""
     
     def __init__(self):
-        self.dynamodb = boto3.resource('dynamodb')
+        self.dynamodb = PaymentSystemUtils.get_dynamodb_resource()
         self.api_keys_table = self.dynamodb.Table('payment-system-api-keys')
         self.audit_table = self.dynamodb.Table('payment-system-audit-log')
         self.threat_intel_table = self.dynamodb.Table('payment-system-threat-intel')

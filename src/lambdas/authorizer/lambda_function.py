@@ -17,31 +17,43 @@ from typing import Dict, Any, Optional
 class PaymentAuthorizer:
     """Handles API key validation and policy generation for payment system"""
     
-    # Valid API keys with their permissions (in production, these would be in a database)
-    VALID_API_KEYS = {
-        # Admin API key - full access
-        'pk_admin_YOUR_ADMIN_API_KEY_HERE': {
-            'permissions': ['payments:create', 'payments:read', 'payments:refund'],
-            'client_id': 'admin_client',
-            'rate_limit': 1000
-        },
-        # Merchant API key - limited access
-        'pk_merchant_YOUR_MERCHANT_API_KEY_HERE': {
-            'permissions': ['payments:create', 'payments:read'],
-            'client_id': 'merchant_client',
-            'rate_limit': 100
-        },
-        # Analytics API key - read only
-        'pk_analytics_YOUR_ANALYTICS_API_KEY_HERE': {
-            'permissions': ['payments:read'],
-            'client_id': 'analytics_client',
-            'rate_limit': 500
-        }
-    }
+    # Valid API keys with their permissions (loaded from environment variables or Secrets Manager in production)
+    # For this demo, we use environment variables with safe defaults
     
     def __init__(self):
         """Initialize the authorizer"""
         self.logger_enabled = True
+        self._load_api_keys()
+        
+    def _load_api_keys(self):
+        """Load API keys from environment variables"""
+        import os
+        
+        # Default placeholders for demo purposes if env vars not set
+        admin_key = os.environ.get('ADMIN_API_KEY', 'pk_admin_demo_key_12345')
+        merchant_key = os.environ.get('MERCHANT_API_KEY', 'pk_merchant_demo_key_67890')
+        analytics_key = os.environ.get('ANALYTICS_API_KEY', 'pk_analytics_demo_key_54321')
+        
+        self.VALID_API_KEYS = {
+            # Admin API key - full access
+            admin_key: {
+                'permissions': ['payments:create', 'payments:read', 'payments:refund'],
+                'client_id': 'admin_client',
+                'rate_limit': 1000
+            },
+            # Merchant API key - limited access
+            merchant_key: {
+                'permissions': ['payments:create', 'payments:read'],
+                'client_id': 'merchant_client',
+                'rate_limit': 100
+            },
+            # Analytics API key - read only
+            analytics_key: {
+                'permissions': ['payments:read'],
+                'client_id': 'analytics_client',
+                'rate_limit': 500
+            }
+        }
     
     def _log(self, message: str) -> None:
         """Log message if logging is enabled"""

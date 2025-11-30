@@ -30,7 +30,7 @@ X-API-Key: your_admin_api_key_here
 | Key Type | API Key | Permissions | Rate Limit |
 |----------|---------|-------------|------------|
 | **Admin** | `your_admin_api_key_here` | Full access | 1000/min |
-| **Merchant** | `your_merchant_api_key_here` | Create + Read | 100/min |
+| **Merchant** | `pk_merchant_demo_key_67890` | Create + Read | 100/min |
 | **Analytics** | `your_analytics_api_key_here` | Read only | 500/min |
 
 ---

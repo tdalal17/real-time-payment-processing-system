@@ -12,12 +12,21 @@ import uuid
 import time
 import decimal
 import boto3
+import os
+import sys
 from typing import Dict, Any, Optional
 from datetime import datetime
 from botocore.exceptions import ClientError
 
-# Initialize AWS clients
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+# Ensure common modules can be imported
+try:
+    from common.utils import PaymentSystemUtils
+except ImportError:
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from common.utils import PaymentSystemUtils
+
+# Initialize AWS clients using common utility
+dynamodb = PaymentSystemUtils.get_dynamodb_resource()
 transactions_table = dynamodb.Table('payment-system-transactions')
 idempotency_table = dynamodb.Table('payment-system-idempotency')
 

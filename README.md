@@ -107,13 +107,13 @@ The system implements a **three-tier API key architecture**:
 ### **API Keys** (Demo Environment)
 ```bash
 # Admin API Key (Full Access)
-X-API-Key: your_admin_api_key_here
+X-API-Key: pk_admin_demo_key_12345
 
 # Merchant API Key (Payments + Read)
-X-API-Key: your_merchant_api_key_here
+X-API-Key: pk_merchant_demo_key_67890
 
 # Analytics API Key (Read Only)
-X-API-Key: your_analytics_api_key_here
+X-API-Key: pk_analytics_demo_key_54321
 ```
 
 ### **Security Features**

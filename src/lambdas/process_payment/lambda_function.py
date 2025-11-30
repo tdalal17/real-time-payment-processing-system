@@ -12,11 +12,21 @@ import uuid
 import time
 import decimal
 import boto3
+import os
+import sys
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-# Initialize AWS clients
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+# Ensure common modules can be imported
+try:
+    from common.utils import PaymentSystemUtils
+except ImportError:
+    # For local testing or different path structure
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from common.utils import PaymentSystemUtils
+
+# Initialize AWS clients using common utility for local/cloud compatibility
+dynamodb = PaymentSystemUtils.get_dynamodb_resource()
 transactions_table = dynamodb.Table('payment-system-transactions')
 idempotency_table = dynamodb.Table('payment-system-idempotency')
 
@@ -128,7 +138,7 @@ class PaymentProcessor:
         
         # Rule 1: High amount transactions
         if amount > decimal.Decimal('1000.00'):
-            fraud_score += 30
+            fraud_score += 50
             risk_factors.append('high_amount')
         
         # Rule 2: Very high amount transactions
@@ -244,12 +254,11 @@ class PaymentProcessor:
                 'message': message
             }
             
-            # Include fraud info for approved transactions (for demo purposes)
-            if status == 'completed':
-                response_data['fraud_check'] = {
-                    'risk_level': fraud_result['risk_level'],
-                    'fraud_score': fraud_result['fraud_score']
-                }
+            # Include fraud info for all transactions (for demo purposes)
+            response_data['fraud_check'] = {
+                'risk_level': fraud_result['risk_level'],
+                'fraud_score': fraud_result['fraud_score']
+            }
             
             status_code = 200 if status in ['completed', 'pending_review'] else 402
             return self._response(status_code, response_data)

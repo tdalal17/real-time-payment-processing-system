@@ -10,7 +10,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'
 
 @pytest.fixture
 def processor(transactions_table, idempotency_table):
-    """Initialize processor with mocked tables ready."""
     # Import here to ensure it uses the mocked environment/boto3
     from lambdas.process_payment import lambda_function
     import importlib
@@ -22,7 +21,6 @@ def processor(transactions_table, idempotency_table):
         return lambda_function.PaymentProcessor()
 
 def test_successful_payment(processor):
-    """Test a standard low-risk payment."""
     event = {
         'body': json.dumps({
             'amount': 100.00,
@@ -41,7 +39,6 @@ def test_successful_payment(processor):
     assert 'transaction_id' in body
 
 def test_high_risk_payment_review(processor):
-    """Test a payment > $1000 triggers manual review."""
     event = {
         'body': json.dumps({
             'amount': 1500.00,
@@ -59,7 +56,6 @@ def test_high_risk_payment_review(processor):
     assert body['fraud_check']['risk_level'] == 'MEDIUM'
 
 def test_very_high_risk_payment_decline(processor):
-    """Test a payment > $5000 + round number triggers decline."""
     event = {
         'body': json.dumps({
             'amount': 6000.00,
@@ -77,7 +73,6 @@ def test_very_high_risk_payment_decline(processor):
     assert body['fraud_check']['risk_level'] == 'HIGH'
 
 def test_idempotency_duplicate_request(processor):
-    """Test that sending the same Idempotency-Key returns the same response."""
     event = {
         'body': json.dumps({
             'amount': 50.00,
@@ -106,7 +101,6 @@ def test_idempotency_duplicate_request(processor):
     assert tx_id1 == tx_id2
 
 def test_missing_fields_validation(processor):
-    """Test validation for missing fields."""
     event = {
         'body': json.dumps({
             'amount': 100.00,

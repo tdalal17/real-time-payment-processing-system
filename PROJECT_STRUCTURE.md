@@ -79,7 +79,7 @@ Real-Time Payment Processing System/
 
 ## 🔌 API Endpoints
 
-**Base URL**: `https://lorty8qfz4.execute-api.us-east-1.amazonaws.com/demo`
+**Base URL**: `https://your-api-id.execute-api.us-east-1.amazonaws.com/demo`
 
 | Method | Endpoint | Function | Description |
 |--------|----------|----------|-------------|

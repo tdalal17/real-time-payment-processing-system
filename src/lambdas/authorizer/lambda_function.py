@@ -116,13 +116,13 @@ class PaymentAuthorizer:
             # Validate API key
             key_metadata = self._validate_api_key(api_key)
             if not key_metadata:
-                self._log(f"Invalid API key: {api_key[:10]}...")
+                self._log("Invalid API key provided")
                 return self._deny_access("Invalid API key")
             
             # Extract method ARN
             method_arn = self._extract_method_arn(event)
             
-            self._log(f"Authorizing client: {key_metadata['client_id']}")
+            self._log("Authorizing client")
             
             # Generate allow policy
             policy = self._generate_policy(method_arn, 'Allow')

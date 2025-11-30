@@ -1,7 +1,4 @@
-"""
-Custom Authorizer for API Gateway
-Handles API key authentication and authorization
-"""
+# Custom authorizer for API Gateway
 
 import json
 import time
@@ -21,20 +18,11 @@ except ImportError:
     from common.utils import PaymentSystemUtils
 
 class AdvancedAuthorizer:
-    """API Gateway custom authorizer with API key validation"""
-
     def __init__(self):
         self.dynamodb = PaymentSystemUtils.get_dynamodb_resource()
         self.api_keys_table = self.dynamodb.Table('payment-system-api-keys')
         self.audit_table = self.dynamodb.Table('payment-system-audit-log')
         self.threat_intel_table = self.dynamodb.Table('payment-system-threat-intel')
-
-        self.suspicious_patterns = {
-            'rapid_requests': 10,
-            'geographic_anomaly': 3,
-            'user_agent_rotation': 5,
-            'api_key_sharing': 2,
-        }
     
     def authorize_request(self, event: Dict[str, Any]) -> Dict[str, Any]:
         """Authorize API request based on API key and permissions"""
@@ -114,52 +102,25 @@ class AdvancedAuthorizer:
             return False, None, f"VALIDATION_ERROR: {str(e)}"
     
     def _calculate_threat_score(self, client_info: Dict[str, Any], event: Dict[str, Any]) -> Tuple[float, List[str]]:
-        """Calculate threat score based on behavioral analysis"""
-        
+        # Basic threat detection - TODO: add rate limiting and geolocation checks
         threat_score = 0.0
         threat_reasons = []
-        
-        # Extract identity info safely for REQUEST authorizer
+
         request_context = event.get('requestContext', {})
         identity = request_context.get('identity', {})
         source_ip = identity.get('sourceIp', '0.0.0.0')
         user_agent = identity.get('userAgent', 'Unknown')
-        client_id = client_info['client_id']
-        
-        # Check for rapid requests
-        recent_requests = self._get_recent_requests(client_id, 60)  # Last minute
-        if recent_requests > self.suspicious_patterns['rapid_requests']:
-            threat_score += 0.3
-            threat_reasons.append("RAPID_REQUESTS")
-        
-        # Check for geographic anomalies
-        unique_countries = self._get_unique_countries_last_hour(client_id)
-        if unique_countries > self.suspicious_patterns['geographic_anomaly']:
-            threat_score += 0.4
-            threat_reasons.append("GEOGRAPHIC_ANOMALY")
-        
-        # Check user agent rotation
-        unique_user_agents = self._get_unique_user_agents_last_hour(client_id)
-        if unique_user_agents > self.suspicious_patterns['user_agent_rotation']:
-            threat_score += 0.2
-            threat_reasons.append("USER_AGENT_ROTATION")
-        
-        # Check for API key sharing
-        concurrent_ips = self._get_concurrent_ips(client_id)
-        if concurrent_ips > self.suspicious_patterns['api_key_sharing']:
-            threat_score += 0.5
-            threat_reasons.append("API_KEY_SHARING")
-        
+
         # Check against known bad IPs
         if self._is_known_bad_ip(source_ip):
             threat_score += 0.8
             threat_reasons.append("KNOWN_BAD_IP")
-        
-        # Check for suspicious user agent patterns
+
+        # Check for suspicious user agent patterns (bots, scrapers, etc)
         if self._is_suspicious_user_agent(user_agent):
             threat_score += 0.3
             threat_reasons.append("SUSPICIOUS_USER_AGENT")
-        
+
         return min(threat_score, 1.0), threat_reasons
     
     def _check_business_authorization(self, client_info: Dict[str, Any], event: Dict[str, Any]) -> Tuple[bool, str]:
@@ -196,48 +157,10 @@ class AdvancedAuthorizer:
         return False, "INSUFFICIENT_PERMISSIONS"
     
     def _validate_rate_limits(self, client_info: Dict[str, Any], event: Dict[str, Any]) -> Tuple[bool, str]:
-        """Advanced rate limiting with burst detection"""
-        
-        client_id = client_info['client_id']
-        current_time = int(time.time())
-        
-        # Get rate limit configuration
-        rate_limit = int(client_info.get('rate_limit_per_minute', 100))
-        
-        # Check burst pattern (more than 50% of limit in 10 seconds)
-        recent_requests_10s = self._get_recent_requests(client_id, 10)
-        burst_threshold = rate_limit * 0.5
-        
-        if recent_requests_10s > burst_threshold:
-            return False, "BURST_RATE_EXCEEDED"
-        
-        # Check standard rate limit
-        recent_requests_60s = self._get_recent_requests(client_id, 60)
-        if recent_requests_60s >= rate_limit:
-            return False, "RATE_LIMIT_EXCEEDED"
-        
+        # TODO: implement actual rate limiting using DynamoDB or ElastiCache
+        # For now, rely on API Gateway's built-in rate limiting
         return True, "RATE_LIMIT_OK"
-    
-    def _get_recent_requests(self, client_id: str, seconds: int) -> int:
-        """Get number of requests in the last N seconds"""
-        # Implementation would query audit logs or rate limiting table
-        return 0  # Placeholder
-    
-    def _get_unique_countries_last_hour(self, client_id: str) -> int:
-        """Get number of unique countries in the last hour"""
-        # Implementation would analyze IP geolocation data
-        return 1  # Placeholder
-    
-    def _get_unique_user_agents_last_hour(self, client_id: str) -> int:
-        """Get number of unique user agents in the last hour"""
-        # Implementation would analyze user agent patterns
-        return 1  # Placeholder
-    
-    def _get_concurrent_ips(self, client_id: str) -> int:
-        """Get number of concurrent IP addresses using the same API key"""
-        # Implementation would check active sessions
-        return 1  # Placeholder
-    
+
     def _is_known_bad_ip(self, ip_address: str) -> bool:
         """Check if IP is in threat intelligence database"""
         try:

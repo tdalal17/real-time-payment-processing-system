@@ -1,8 +1,3 @@
-"""
-Payment Processing Lambda
-Handles payment validation, fraud detection, and transaction storage
-"""
-
 import json
 import uuid
 import time
@@ -13,37 +8,30 @@ import sys
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-# Ensure common modules can be imported
 try:
     from common.utils import PaymentSystemUtils
 except ImportError:
-    # For local testing or different path structure
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
     from common.utils import PaymentSystemUtils
 
-# Initialize AWS clients using common utility for local/cloud compatibility
 dynamodb = PaymentSystemUtils.get_dynamodb_resource()
 transactions_table = dynamodb.Table('payment-system-transactions')
 idempotency_table = dynamodb.Table('payment-system-idempotency')
 
 
 class PaymentProcessor:
-    """Processes payments with validation and fraud detection"""
-
     SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP']
     MIN_AMOUNT = decimal.Decimal('0.01')
     MAX_AMOUNT = decimal.Decimal('99999.99')
 
     def __init__(self):
         self.logger_enabled = True
-    
+
     def _log(self, message: str) -> None:
-        """Log message if logging is enabled"""
         if self.logger_enabled:
             print(f"[PaymentProcessor] {message}")
     
     def _response(self, status_code: int, body: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate standardized API response"""
         return {
             'statusCode': status_code,
             'headers': {
@@ -55,14 +43,11 @@ class PaymentProcessor:
         }
     
     def _validate_payment_request(self, data: Dict[str, Any]) -> Optional[str]:
-        """Validate payment request data"""
-        
-        # Check required fields
         required_fields = ['amount', 'currency', 'user_id', 'merchant_id']
         for field in required_fields:
             if field not in data:
                 return f"Missing required field: {field}"
-        
+
         # Validate amount
         try:
             amount = decimal.Decimal(str(data['amount']))
@@ -76,17 +61,16 @@ class PaymentProcessor:
         # Validate currency
         if data['currency'] not in self.SUPPORTED_CURRENCIES:
             return f"Unsupported currency. Supported: {', '.join(self.SUPPORTED_CURRENCIES)}"
-        
-        # Validate string fields
+
+        # FIXME: should add regex validation for user_id and merchant_id
         if not data['user_id'].strip():
             return "user_id cannot be empty"
         if not data['merchant_id'].strip():
             return "merchant_id cannot be empty"
-        
-        return None  # No validation errors
+
+        return None
     
     def _check_idempotency(self, idempotency_key: str) -> Optional[Dict[str, Any]]:
-        """Check if request has been processed before"""
         if not idempotency_key:
             return None
         
@@ -105,7 +89,6 @@ class PaymentProcessor:
         return None
     
     def _store_idempotency(self, idempotency_key: str, transaction_data: Dict[str, Any]) -> None:
-        """Store idempotency record"""
         if not idempotency_key:
             return
         
@@ -123,30 +106,23 @@ class PaymentProcessor:
             self._log(f"Error storing idempotency record: {str(e)}")
     
     def _perform_fraud_check(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Simple fraud detection rules"""
-        
-        # Initialize fraud score
+        # TODO: integrate with actual fraud detection service (Stripe Radar, Sift, etc.)
         fraud_score = 0
         risk_factors = []
-        
+
         amount = decimal.Decimal(str(payment_data['amount']))
-        
-        # Rule 1: High amount transactions
+
         if amount > decimal.Decimal('1000.00'):
             fraud_score += 50
             risk_factors.append('high_amount')
-        
-        # Rule 2: Very high amount transactions
+
         if amount > decimal.Decimal('5000.00'):
             fraud_score += 50
             risk_factors.append('very_high_amount')
-        
-        # Rule 3: Round number amounts (potential testing)
+
         if amount % 1 == 0 and amount >= decimal.Decimal('100.00'):
             fraud_score += 10
             risk_factors.append('round_amount')
-        
-        # Determine risk level
         if fraud_score >= 80:
             risk_level = 'HIGH'
             decision = 'DECLINE'
@@ -165,7 +141,6 @@ class PaymentProcessor:
         }
     
     def _store_transaction(self, transaction_data: Dict[str, Any]) -> None:
-        """Store transaction in DynamoDB"""
         try:
             transactions_table.put_item(Item=transaction_data)
             self._log(f"Transaction stored: {transaction_data['transaction_id']}")
@@ -174,8 +149,6 @@ class PaymentProcessor:
             raise
     
     def process_payment(self, event: Dict[str, Any]) -> Dict[str, Any]:
-        """Main payment processing logic"""
-        
         try:
             # Parse request body
             try:
@@ -267,15 +240,5 @@ class PaymentProcessor:
 
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    """
-    Lambda handler for payment processing
-    
-    Args:
-        event: API Gateway event
-        context: Lambda context
-    
-    Returns:
-        Dict containing API response
-    """
     processor = PaymentProcessor()
     return processor.process_payment(event)

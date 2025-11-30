@@ -11,7 +11,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'
 
 @pytest.fixture
 def refund_processor(transactions_table, idempotency_table):
-    """Initialize refund processor."""
     from lambdas.process_refund import lambda_function
     import importlib
     importlib.reload(lambda_function)
@@ -23,7 +22,6 @@ def refund_processor(transactions_table, idempotency_table):
 
 @pytest.fixture
 def seed_transaction(transactions_table):
-    """Seed a completed transaction for refund testing."""
     tx_id = "tx_12345_completed"
     transactions_table.put_item(Item={
         'transaction_id': tx_id,
@@ -37,7 +35,6 @@ def seed_transaction(transactions_table):
     return tx_id
 
 def test_full_refund(refund_processor, seed_transaction):
-    """Test refunding the full amount."""
     event = {
         'pathParameters': {'transaction_id': seed_transaction},
         'body': json.dumps({
@@ -55,7 +52,6 @@ def test_full_refund(refund_processor, seed_transaction):
     assert float(body['total_refunded']) == 100.00
 
 def test_partial_refund(refund_processor, seed_transaction):
-    """Test refunding only part of the amount."""
     event = {
         'pathParameters': {'transaction_id': seed_transaction},
         'body': json.dumps({
@@ -72,7 +68,6 @@ def test_partial_refund(refund_processor, seed_transaction):
     assert float(body['total_refunded']) == 25.50
 
 def test_refund_exceeds_amount(refund_processor, seed_transaction):
-    """Test that refund > original amount fails."""
     event = {
         'pathParameters': {'transaction_id': seed_transaction},
         'body': json.dumps({
@@ -88,7 +83,6 @@ def test_refund_exceeds_amount(refund_processor, seed_transaction):
     assert 'exceeds original transaction amount' in body['error']
 
 def test_refund_invalid_transaction_state(refund_processor, transactions_table):
-    """Test that we cannot refund a declined transaction."""
     tx_id = "tx_failed_1"
     transactions_table.put_item(Item={
         'transaction_id': tx_id,

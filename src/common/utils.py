@@ -1,7 +1,3 @@
-"""
-Common utilities for the payment system
-"""
-
 import json
 import os
 import time
@@ -12,14 +8,11 @@ from datetime import datetime
 
 
 class PaymentSystemUtils:
-    """Common utilities for payment system"""
-    
     @staticmethod
     def get_dynamodb_resource():
-        """Get DynamoDB resource with optional local endpoint support"""
         endpoint_url = os.environ.get('DYNAMODB_ENDPOINT')
         region = os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
-        
+
         if endpoint_url:
             print(f"[Utils] Connecting to DynamoDB at {endpoint_url}")
             return boto3.resource('dynamodb', region_name=region, endpoint_url=endpoint_url)
